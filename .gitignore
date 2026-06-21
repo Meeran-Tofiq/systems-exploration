@@ -1,8 +1,14 @@
-# Java / compiler
+# Java / compiler (jlox)
 *.class
 compiler/out/
 compiler/bin/
 compiler/target/
+
+# C / compiler (clox)
+*.o
+*.out
+compiler/clox/clox
+compiler/**/a.out
 
 # Rust / OS
 os/target/
