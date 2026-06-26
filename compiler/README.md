@@ -35,10 +35,27 @@ distinctly-compiler part is the back-end:
 Don't need to finish clox; even a week in, I'll feel whether codegen/back-end excites me.
 This jlox→clox arc mirrors TU Delft's **CS4200** (front-end → back-end/codegen).
 
-## How to run (fill in once it exists)
-```sh
-# e.g. javac *.java && java Lox script.lox
+## Layout
+Standard Java `src/ → bin/` layout, so editors/LSPs (jdtls, etc.) and a future
+build tool resolve the `com.craftinginterpreters.lox` package without config:
 ```
+jlox/
+├── .classpath   ← source root = src/, output = bin/
+├── .project     ← marks jlox/ as the project root
+├── hello.lox
+└── src/com/craftinginterpreters/lox/Lox.java
+```
+
+## How to run
+```sh
+cd jlox
+javac -d bin src/com/craftinginterpreters/lox/*.java   # compile src -> bin
+java -cp bin com.craftinginterpreters.lox.Lox hello.lox # run a script
+java -cp bin com.craftinginterpreters.lox.Lox           # REPL (Ctrl-D to exit)
+```
+Right now `run()` just echoes input — replace it with a real Scanner as you work
+through Chapter 4 (add `Token.java`, `TokenType.java`, `Scanner.java` in the same
+`src/com/craftinginterpreters/lox/` folder).
 
 ## What I learned / would do next
 - (write this at the end — recruiters/admissions read the README)

@@ -1,0 +1,4 @@
+// A first Lox script. Once your scanner works, this should tokenize cleanly.
+print "Hello, Lox!";
+var a = (3 + 4) * 2;
+print a;
