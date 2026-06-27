@@ -6,12 +6,16 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.Scanner;
 
 // jlox entry point. This is the harness from Crafting Interpreters, Chapter 4.
 // It compiles and runs as-is. As you read Chapter 4, replace the TODO in run()
 // with a real Scanner: add Token.java, TokenType.java, Scanner.java alongside
 // this file (same package) and tokenize `source` here.
 public class Lox {
+  static boolean hadError = false;
+
   public static void main(String[] args) throws IOException {
     if (args.length > 1) {
       System.out.println("Usage: jlox [script]");
@@ -26,25 +30,37 @@ public class Lox {
   private static void runFile(String path) throws IOException {
     byte[] bytes = Files.readAllBytes(Paths.get(path));
     run(new String(bytes, Charset.defaultCharset()));
+    if (hadError) System.exit(65);
   }
 
   private static void runPrompt() throws IOException {
     InputStreamReader input = new InputStreamReader(System.in);
     BufferedReader reader = new BufferedReader(input);
 
-    for (;;) {
+    for (; ; ) {
       System.out.print("> ");
       String line = reader.readLine();
       if (line == null) break; // Ctrl-D to exit
       run(line);
+      hadError = false;
     }
   }
 
   private static void run(String source) {
-    // TODO (Chapter 4 — Scanning): tokenize and print the tokens.
-    //   Scanner scanner = new Scanner(source);
-    //   for (Token token : scanner.scanTokens()) System.out.println(token);
-    // For now, echo the input so you can confirm the project builds and runs.
-    System.out.println(source);
+    Scanner scanner = new Scanner(source);
+    List<Token> tokens = scanner.scanTokens();
+
+    for (Token token : tokens) {
+      System.out.println(token);
+    }
+  }
+
+  static void error(int line, String message) {
+    report(line, "", message);
+  }
+
+  private static void report(int line, String where, String message) {
+    System.err.println("[Line " + line + "] Error" + where + ": " + message);
+    hadError = true;
   }
 }
