@@ -7,7 +7,6 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Scanner;
 
 // jlox entry point. This is the harness from Crafting Interpreters, Chapter 4.
 // It compiles and runs as-is. As you read Chapter 4, replace the TODO in run()
