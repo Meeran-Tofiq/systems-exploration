@@ -111,7 +111,7 @@ public class Parser {
     Token operator;
     Token token = peek();
 
-    if (token.type != BANG || token.type != MINUS) return parsePrimary();
+    if (token.type != BANG && token.type != MINUS) return parsePrimary();
 
     operator = new Token(token);
     advance();
