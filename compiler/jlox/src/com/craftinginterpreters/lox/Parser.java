@@ -17,14 +17,37 @@ public class Parser {
     return this.parseExpr();
   }
 
+  private boolean isAtEnd() {
+    return peek().type == EOF;
+  }
+
   private Token peek() {
-    if (tokens.size() <= current) return null;
     return tokens.get(current);
   }
 
+  private Token previous() {
+    return tokens.get(current - 1);
+  }
+
   private Token advance() {
-    if (tokens.size() <= current) return null;
-    return tokens.get(current++);
+    if (!isAtEnd()) current++;
+    return previous();
+  }
+
+  private boolean check(TokenType type) {
+    if (isAtEnd()) return false;
+    return peek().type == type;
+  }
+
+  private boolean match(TokenType... types) {
+    for (TokenType type : types) {
+      if (check(type)) {
+        advance();
+        return true;
+      }
+    }
+
+    return false;
   }
 
   private Expr parseExpr() {
@@ -35,15 +58,9 @@ public class Parser {
     Token operator;
     Expr expr = parseComparison();
 
-    Token token = peek();
-    if (token == null) return expr;
-
-    while (token != null && (token.type == EQUAL_EQUAL || token.type == BANG_EQUAL)) {
-      token = advance();
-      operator = new Token(token);
+    while (match(EQUAL_EQUAL, BANG_EQUAL)) {
+      operator = previous();
       expr = new Binary(expr, operator, parseComparison());
-
-      token = peek();
     }
 
     return expr;
@@ -53,19 +70,9 @@ public class Parser {
     Token operator;
     Expr expr = parseTerm();
 
-    Token token = peek();
-    if (token == null) return expr;
-
-    while (token != null
-        && (token.type == GREATER
-            || token.type == GREATER_EQUAL
-            || token.type == LESS
-            || token.type == LESS_EQUAL)) {
-      token = advance();
-      operator = new Token(token);
+    while (match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) {
+      operator = previous();
       expr = new Binary(expr, operator, parseTerm());
-
-      token = peek();
     }
 
     return expr;
@@ -75,15 +82,9 @@ public class Parser {
     Token operator;
     Expr expr = parseFactor();
 
-    Token token = peek();
-    if (token == null) return expr;
-
-    while (token != null && (token.type == PLUS || token.type == MINUS)) {
-      token = advance();
-      operator = new Token(token);
+    while (match(PLUS, MINUS)) {
+      operator = previous();
       expr = new Binary(expr, operator, parseFactor());
-
-      token = peek();
     }
 
     return expr;
@@ -93,49 +94,38 @@ public class Parser {
     Token operator;
     Expr expr = parseUnary();
 
-    Token token = peek();
-    if (token == null) return expr;
-
-    while (token != null && (token.type == STAR || token.type == SLASH)) {
-      token = advance();
-      operator = new Token(token);
+    while (match(STAR, SLASH)) {
+      operator = previous();
       expr = new Binary(expr, operator, parseUnary());
-
-      token = peek();
     }
 
     return expr;
   }
 
   private Expr parseUnary() {
-    Token operator;
-    Token token = peek();
+    if (match(BANG, MINUS)) {
+      Token operator = previous();
+      Expr expr = parseUnary();
+      return new Unary(operator, expr);
+    }
 
-    if (token.type != BANG && token.type != MINUS) return parsePrimary();
-
-    operator = new Token(token);
-    advance();
-    return new Unary(operator, parseUnary());
+    return parsePrimary();
   }
 
   private Expr parsePrimary() {
-    Token token = peek();
-    if (token.type == LEFT_PAREN) return parseGrouping();
-    token = advance();
-    return new Literal(token.literal);
-  }
+    if (match(FALSE)) return new Literal(false);
+    if (match(TRUE)) return new Literal(true);
+    if (match(NIL)) return new Literal(null);
 
-  private Expr parseGrouping() {
-    Token token = advance();
-    Expr expr = null;
-
-    if (token.type == LEFT_PAREN) {
-      expr = parseExpr();
+    if (match(NUMBER, STRING)) {
+      return new Literal(previous().literal);
     }
 
-    if (peek().type == RIGHT_PAREN) expr = new Grouping(expr);
-    advance();
-
-    return expr;
+    if (match(LEFT_PAREN)) {
+      Expr expr = parseExpr();
+      // consume(RIGHT_PAREN, "Expect ')' after expression.");
+      return new Grouping(expr);
+    }
+    return null;
   }
 }
