@@ -6,6 +6,8 @@ import com.craftinginterpreters.lox.Expr.*;
 import java.util.List;
 
 public class Parser {
+  private static class ParseError extends RuntimeException {}
+
   private final List<Token> tokens;
   private int current = 0;
 
@@ -14,7 +16,11 @@ public class Parser {
   }
 
   public Expr parse() {
-    return this.parseExpr();
+    try {
+      return this.parseExpr();
+    } catch (Exception e) {
+      return null;
+    }
   }
 
   private boolean isAtEnd() {
@@ -27,6 +33,12 @@ public class Parser {
 
   private Token previous() {
     return tokens.get(current - 1);
+  }
+
+  private Token consume(TokenType type, String message) {
+    if (check(type)) return advance();
+
+    throw error(peek(), message);
   }
 
   private Token advance() {
@@ -48,6 +60,32 @@ public class Parser {
     }
 
     return false;
+  }
+
+  private ParseError error(Token token, String message) {
+    Lox.error(token, message);
+    return new ParseError();
+  }
+
+  @SuppressWarnings("incomplete-switch")
+  private void synchronize() {
+    advance();
+
+    while (!isAtEnd()) {
+      if (previous().type == SEMICOLON) return;
+
+      switch (peek().type) {
+        case CLASS:
+        case FUN:
+        case VAR:
+        case FOR:
+        case IF:
+        case WHILE:
+        case PRINT:
+        case RETURN:
+          return;
+      }
+    }
   }
 
   private Expr parseExpr() {
@@ -126,6 +164,7 @@ public class Parser {
       // consume(RIGHT_PAREN, "Expect ')' after expression.");
       return new Grouping(expr);
     }
-    return null;
+
+    throw error(peek(), "Expression expected.");
   }
 }
