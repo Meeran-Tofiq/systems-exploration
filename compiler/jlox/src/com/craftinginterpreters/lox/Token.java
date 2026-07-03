@@ -13,6 +13,13 @@ public class Token {
     this.line = line;
   }
 
+  Token(Token token) {
+    this.type = token.type;
+    this.lexeme = token.lexeme;
+    this.literal = token.literal;
+    this.line = token.line;
+  }
+
   public String toString() {
     return type + " " + lexeme + " " + literal;
   }
