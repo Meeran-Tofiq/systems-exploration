@@ -1,6 +1,7 @@
 # Systems Exploration Journal
 
-After each session, fill one entry. Be honest — first instinct. This is how I pick my subfield.
+After each session, fill one entry. Be honest — first instinct. This is how I
+pick my subfield.
 
 ---
 
@@ -21,7 +22,7 @@ After each session, fill one entry. Be honest — first instinct. This is how I 
 
 -->
 
-## Compiler — Session 1 — 26/06/2026—28/06/2026 — 9 hours
+## Compiler — Session 1 — 26/06/2026—28/06/2026 — 9 hours (combined)
 
 ## **What I did:**
 
@@ -33,6 +34,21 @@ as I could, just because of how much fun I was having.
 
 **Curiosity tail:** I had to log off because it was midnight and I had an early
 day the next day(s). Otherwise I would not have stopped.
+
+**One line:** Very, very fun.
+
+## Compiler — Session 2 — 03/07/2026 — 9.5 hours
+
+## **What I did:**
+
+**Pull:** This time I built everything by myself, then consulted the book. It
+was very fun.
+
+**Frustration type:** Once again, it was fun-hard.
+
+**Curiosity tail:** Again I did not want to stop, but I had to. It's incredible.
+There were some extra challenges at the end, I will definitely be returning to
+these later in the future.
 
 **One line:** Very, very fun.
 
