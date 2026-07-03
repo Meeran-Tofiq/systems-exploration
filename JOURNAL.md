@@ -21,28 +21,30 @@ After each session, fill one entry. Be honest — first instinct. This is how I 
 
 -->
 
-## Compiler — Session 1 — [date] — [hours]
+## Compiler — Session 1 — 26/06/2026—28/06/2026 — 9 hours
 
-**What I did:**
--
+## **What I did:**
 
-**Pull:** _/5
+**Pull:** I truly felt so excited during the entire process. Every piece of the
+puzzle would click, and it would motivate me to keep going.
 
-**Frustration type:**
+**Frustration type:** It was fun-hard. I felt compelled to understand as deeply
+as I could, just because of how much fun I was having.
 
-**Curiosity tail:**
+**Curiosity tail:** I had to log off because it was midnight and I had an early
+day the next day(s). Otherwise I would not have stopped.
 
-**One line:**
+**One line:** Very, very fun.
 
 ---
 
 # Final comparison (after all three)
 
-| Project | Pull /5 | Fun-hard /5 | Curiosity tail /5 | Total /15 |
-|---------|---------|-------------|-------------------|-----------|
-| Compiler | | | | |
-| Embedded | | | | |
-| OS | | | | |
+| Project  | Pull /5 | Fun-hard /5 | Curiosity tail /5 | Total /15 |
+| -------- | ------- | ----------- | ----------------- | --------- |
+| Compiler |         |             |                   |           |
+| Embedded |         |             |                   |           |
+| OS       |         |             |                   |           |
 
 **Winner:**
 
