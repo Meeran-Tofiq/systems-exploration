@@ -57,16 +57,18 @@ On posting day I scan for these lines instead of staring at a blank page.)
 
 ### What happened
 
-**Built:** _(BACKFILL from git log — commits `5045986`..`21df857`: token types, basic scanning,
-error handling, the `Expr` class + AST generator, a printer to test the generated tree.)_
+**Built:** Token types, basic scanning + error handling, the `Expr` class + AST generator, a printer
+to test the generated tree. (Commits `5045986`..`21df857`.)
 
-**The snag:** _(backfill if I can remember one)_
+**The snag:** — *nothing to record. These were the intro chapters and I mostly typed along with the
+book, because I was too clueless about all of it to build anything myself yet. That's what those
+chapters are for. Not backfilling this retroactively.*
 
-**The click:** _(backfill)_
+**The click:** —
 
-**Decision I made:** _(backfill)_
+**Decision I made:** —
 
-**Question I couldn't answer:** _(backfill)_
+**Question I couldn't answer:** —
 
 ### How it felt
 
@@ -83,7 +85,7 @@ day the next day(s). Otherwise I would not have stopped.
 
 ### Output
 
-**Post seed:** _(backfill)_
+**Post seed:** — nothing here; transcription chapters.
 
 ---
 
@@ -91,20 +93,37 @@ day the next day(s). Otherwise I would not have stopped.
 
 ### What happened
 
-**Built:** _(BACKFILL from git log — commits `f192ec7`..`9fc6a97`: hand-rolled the parser before
-reading the book's version, AST printing for expressions, fixed a `parseUnary` check that bypassed
-`!` and `-`, then refactored to match the book's design.)_
+**Built:** Hand-rolled the whole expression parser myself *before* reading the book's version. AST
+printing for expressions. Fixed a `parseUnary` check that bypassed `!` and `-` (`7d72cb0`). Then
+refactored to match the book's design (`17a353e`). Commits `f192ec7`..`9fc6a97`.
 
-**The snag:** _(BACKFILL — commit `7d72cb0`, "fix check in parse unary that bypassed ! and -".
-This is a complete post on its own: what I got wrong about unary parsing and how the bug showed up.)_
+**The snag:** My `peek()` returned `null` once the token list ran out. Consequence: every single
+rule needed `if (token == null) return expr;` at the top, and every while-loop needed a
+`token != null` in its condition. I wrote that same guard four times and never questioned it — it
+felt like just what parsing was.
 
-**The click:** _(backfill)_
+**The click:** The book never has a null because **the scanner always appends an EOF token.** One
+fake element at the end of the data, and `isAtEnd()` is just `peek().type == EOF`. Every null check
+in every rule disappears. The general lesson has nothing to do with compilers: *a sentinel at the
+end of your data removes a special case from every consumer of it.*
 
-**Decision I made:** _(BACKFILL — I wrote the parser my own way first, then refactored to the book's
-design (`17a353e`). Why did I change it? What did the book's version do better? That comparison is
-the most interesting thing in this repo and it's currently unwritten.)_
+**Decision I made:** Built it my own way first, then read the book and refactored (`17a353e`,
+51+/61−). Worth recording what survived and what didn't:
+- **Survived — the architecture.** I'd independently arrived at the precedence cascade
+  (equality → comparison → term → factor → unary → primary) with left-associative while-loops.
+  That's the actual insight of recursive descent, and I got it without being told.
+- **Didn't survive — the vocabulary.** No `match()` / `check()` / `previous()` / `isAtEnd()`, so
+  each binary rule was ~11 lines of peek/null-check/while/advance/copy/re-peek. The book's are ~5.
+  Identical algorithm, a quarter less ceremony.
+- **Didn't survive — `new Token(token)`.** I was defensively copying the operator token every time.
+  The book just aliases it. I was copying because I didn't trust my own mutation model.
+- **Didn't survive — `parsePrimary`.** Mine silently accepted a missing `)` and didn't handle
+  `true` / `false` / `nil` at all. Silently accepting malformed input is a real bug class, not a
+  style difference.
 
-**Question I couldn't answer:** _(backfill)_
+**Question I couldn't answer:** Why did I reach for `null` as the end-of-input signal so
+automatically? Is the sentinel trick something I'd now spot in non-parser code, or only here
+because someone showed me?
 
 ### How it felt
 
@@ -121,8 +140,10 @@ these later in the future.
 
 ### Output
 
-**Post seed:** "I wrote the parser myself before reading how the book does it" — what I got right,
-what I got wrong, and what the refactor taught me. **← strong candidate for the first LinkedIn post.**
+**Post seed:** **← POST #1.** *"My parser worked. Then I added one fake token to the end of the list
+and deleted a null check from every function I'd written."* Format: **the click**. The sentinel
+lesson is transferable well beyond compilers, which is what makes it postable rather than just a
+diary entry. Open on the four repeated null guards, land on EOF-as-sentinel.
 
 ---
 
