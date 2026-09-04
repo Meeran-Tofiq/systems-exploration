@@ -1,5 +1,6 @@
 package com.craftinginterpreters.lox;
 
+import com.craftinginterpreters.lox.Interpreter.InterpreterError;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -55,6 +56,13 @@ public class Lox {
     if (hadError) return;
 
     new AstPrinter().print(expr);
+
+    try {
+      Object obj = expr.accept(new Interpreter());
+      System.out.println("Result: " + obj);
+    } catch (InterpreterError e) {
+      error(e.token, e.getMessage());
+    }
   }
 
   static void error(int line, String message) {
