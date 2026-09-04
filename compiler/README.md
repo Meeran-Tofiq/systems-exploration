@@ -4,9 +4,9 @@ Following **[Crafting Interpreters](https://craftinginterpreters.com)** to test 
 compilers. **Two phases**, because interpreters and compilers share ~80% (the front-end), and the
 distinctly-compiler part is the back-end:
 
-- **Phase 1 — jlox** (Part II, Java): a tree-walking interpreter. Tests *"do I love language
+- **Phase 1 — jlox** (Part II, Java): a tree-walking interpreter. Answers *"do I love language
   implementation?"* (lexer/parser/AST — the shared front-end). ← the interest **filter**.
-- **Phase 2 — clox** (Part III, C): a bytecode **compiler** + VM. Tests *"is it **compilers**
+- **Phase 2 — clox** (Part III, C): a bytecode **compiler** + VM. Answers *"is it **compilers**
   specifically — codegen/back-end — that I love?"* ← the **confirmation**, do this if jlox grips me.
 
 ## What this is
@@ -32,8 +32,8 @@ distinctly-compiler part is the back-end:
 | 4 | 14–17 (bytecode, the VM, compiling expressions) | VM executes compiled bytecode for an expression |
 | 5 | 18–21+ as far as interest carries | Real codegen — judge the *compiler* love |
 
-Don't need to finish clox; even a week in, I'll feel whether codegen/back-end excites me.
-This jlox→clox arc mirrors TU Delft's **CS4200** (front-end → back-end/codegen).
+Don't need to finish clox; even a week in, I'll feel whether codegen/back-end excites me. The
+jlox→clox arc is the same front-end → back-end progression a compilers course follows.
 
 ## Layout
 Standard Java `src/ → bin/` layout, so editors/LSPs (jdtls, etc.) and a future
@@ -57,5 +57,32 @@ Right now `run()` just echoes input — replace it with a real Scanner as you wo
 through Chapter 4 (add `Token.java`, `TokenType.java`, `Scanner.java` in the same
 `src/com/craftinginterpreters/lox/` folder).
 
-## What I learned / would do next
-- (write this at the end — recruiters/admissions read the README)
+## What I learned so far
+
+**Write the parser yourself first, then read the book.** For the expression parser I did it in that
+order, and the comparison taught me far more than following along would have. The structure I
+arrived at independently was right — the precedence cascade (`equality → comparison → term → factor
+→ unary → primary`, each level looping to stay left-associative) really is the core idea of
+recursive descent, and it's derivable if you sit with the grammar long enough.
+
+**Where mine was wrong was more interesting than where it was right.** My `peek()` returned `null`
+once the token list ran out. That one decision forced `if (token == null) return expr;` at the top of
+every rule and a `token != null` in every loop condition — a guard I wrote four times without ever
+questioning it, because I assumed defensive code was just what parsing looked like.
+
+The book never has a null, because the scanner appends an **EOF token** to the end of the list.
+There's always a token, so "am I at the end?" becomes an ordinary comparison rather than a special
+case, and all four guards disappear. The general form of that has nothing to do with parsers:
+**a sentinel at the end of your data removes a special case from every consumer of it.**
+
+Two smaller things the comparison surfaced: I was defensively copying each operator token with
+`new Token(token)` because I didn't trust my own mutation model, and my `parsePrimary` silently
+accepted a missing `)` instead of reporting it — accepting malformed input quietly is a bug class,
+not a style preference.
+
+## What I'd do next
+- Finish jlox to **MINIMUM DONE**: recursive `fib(n)`.
+- Then clox (Part III) — the actual compiler, in C — to find out whether it's *codegen* I like or
+  just language implementation generally.
+- Revisit the optimization ideas I've been collecting in
+  [`Stuff to Research Later.md`](Stuff%20to%20Research%20Later.md).

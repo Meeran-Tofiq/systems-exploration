@@ -1,11 +1,14 @@
 # Systems Exploration
 
-Three small low-level projects to find out which subfield I love most — and to build a portfolio
-for master's / scholarship applications. Plan lives in my `masters` repo
-(`01a-project-kickoff.md`).
+Three small low-level projects, built to find out which one I actually love.
+
+I've spent my career above the application layer, and I want to know what's underneath it. So rather
+than read about compilers, embedded systems and kernels, I'm building a small version of each and
+paying attention to which one I reach for on a weekend.
 
 **The goal isn't three polished projects — it's discovering which one I can't stop thinking about.**
-Hit each project's **MINIMUM DONE**, then judge it in [`JOURNAL.md`](JOURNAL.md). Compare at the end.
+Hit each project's **MINIMUM DONE**, then judge it honestly in [`JOURNAL.md`](JOURNAL.md), and
+compare at the end.
 
 ## The three projects
 
@@ -22,4 +25,4 @@ Hit each project's **MINIMUM DONE**, then judge it in [`JOURNAL.md`](JOURNAL.md)
 2. **Fun-hard vs drain-hard** — was the hard part a puzzle I enjoyed, or a slog I forced?
 3. **Curiosity tail** — afterward, did I want to go deeper, or was I relieved it ended?
 
-The winner drives my university/subfield choice.
+The winner is the one I go deep on next.

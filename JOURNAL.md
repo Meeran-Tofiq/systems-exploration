@@ -159,7 +159,7 @@ diary entry. Open on the four repeated null guards, land on EOF-as-sentinel.
 
 **Why:**
 
-**→ Subfield decision feeds into the `masters` repo (docs 02 / 03 / 06).**
+**→ The winner is the one I go deep on next.**
 
 ---
 
@@ -173,4 +173,4 @@ format twice in a row).
 |------|--------|------|-------|------|
 |      |        |      |       |      |
 
-**Cadence: biweekly. Skipping a cycle is free. See `masters/07-visibility-and-career.md` §4.**
+**Cadence: biweekly-ish. Skipping a cycle is free.**
