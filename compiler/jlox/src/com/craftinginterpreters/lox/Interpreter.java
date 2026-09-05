@@ -63,8 +63,8 @@ public class Interpreter implements Expr.Visitor<Object> {
 
   @Override
   public Object visitBinaryExpr(Binary expr) {
-    Object left = expr.left.accept(this);
-    Object right = expr.right.accept(this);
+    Object left = evaluate(expr.left);
+    Object right = evaluate(expr.right);
 
     switch (expr.operator.type) {
       case PLUS:
@@ -75,13 +75,20 @@ public class Interpreter implements Expr.Visitor<Object> {
         if (left instanceof String && right instanceof String) {
           return (String) left + (String) right;
         }
-        throw new RuntimeError(expr.operator, "Operands must be two numbers or two strings.");
 
+        if (left instanceof String || right instanceof String) {
+          return stringify(left) + stringify(right);
+        }
+
+        throw new RuntimeError(
+            expr.operator,
+            "Operands must be two numbers, two strings, or a string with something else.");
       case MINUS:
         checkNumberOperands(expr.operator, left, right);
         return (double) left - (double) right;
       case SLASH:
         checkNumberOperands(expr.operator, left, right);
+        if ((Double) right == 0) throw new RuntimeError(expr.operator, "Cannot divide by 0.");
         return (double) left / (double) right;
       case STAR:
         checkNumberOperands(expr.operator, left, right);
@@ -129,6 +136,6 @@ public class Interpreter implements Expr.Visitor<Object> {
 
   private void checkNumberOperands(Token operator, Object left, Object right) {
     if (left instanceof Double && right instanceof Double) return;
-    throw new RuntimeError(operator, "Operands must be a number");
+    throw new RuntimeError(operator, "Operands must be numbers");
   }
 }
