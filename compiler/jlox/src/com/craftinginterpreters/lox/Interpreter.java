@@ -1,142 +1,134 @@
 package com.craftinginterpreters.lox;
 
-import static com.craftinginterpreters.lox.TokenType.*;
-
 import com.craftinginterpreters.lox.Expr.Binary;
 import com.craftinginterpreters.lox.Expr.Grouping;
 import com.craftinginterpreters.lox.Expr.Literal;
 import com.craftinginterpreters.lox.Expr.Unary;
 
 public class Interpreter implements Expr.Visitor<Object> {
-  static class InterpreterError extends RuntimeException {
-    Token token;
+  private Object evaluate(Expr expr) {
+    return expr.accept(this);
+  }
 
-    InterpreterError(String m, Token t) {
-      super(m);
-      this.token = t;
+  void interpret(Expr expression) {
+    try {
+      Object value = evaluate(expression);
+      System.out.println(stringify(value));
+    } catch (RuntimeError error) {
+      Lox.runtimeError(error);
     }
+  }
+
+  private String stringify(Object object) {
+    if (object == null) return "nil";
+
+    if (object instanceof Double) {
+      String text = object.toString();
+      if (text.endsWith(".0")) {
+        text = text.substring(0, text.length() - 2);
+      }
+      return text;
+    }
+
+    return object.toString();
+  }
+
+  @Override
+  public Object visitLiteralExpr(Literal expr) {
+    return expr.value;
+  }
+
+  @Override
+  public Object visitGroupingExpr(Grouping expr) {
+    return evaluate(expr.expression);
+  }
+
+  @Override
+  public Object visitUnaryExpr(Unary expr) {
+    Object right = evaluate(expr.right);
+
+    switch (expr.operator.type) {
+      case BANG:
+        return !isTruthy(right);
+      case MINUS:
+        checkNumberOperand(expr.operator, right);
+        return -(double) right;
+      default:
+        break;
+    }
+
+    // unreachable
+    return null;
   }
 
   @Override
   public Object visitBinaryExpr(Binary expr) {
-    // EQUAL_EQUAL, BANG_EQUAL
-    // GREATER, GREATER_EQUAL, LESS, LESS_EQUAL
     Object left = expr.left.accept(this);
     Object right = expr.right.accept(this);
 
     switch (expr.operator.type) {
       case PLUS:
-        if (isLeftRightMatch(left, right, String.class)) {
-          return (String) left + (String) right;
-        } else if (isLeftRightMatch(left, right, Double.class)) {
-          return (Double) left + (Double) right;
+        if (left instanceof Double && right instanceof Double) {
+          return (double) left + (double) right;
         }
-        break;
+
+        if (left instanceof String && right instanceof String) {
+          return (String) left + (String) right;
+        }
+        throw new RuntimeError(expr.operator, "Operands must be two numbers or two strings.");
+
       case MINUS:
-        if (isLeftRightMatch(left, right, Double.class)) return (Double) left - (Double) right;
-        break;
-      case STAR:
-        if (isLeftRightMatch(left, right, Double.class)) return (Double) left * (Double) right;
-        break;
+        checkNumberOperands(expr.operator, left, right);
+        return (double) left - (double) right;
       case SLASH:
-        if (isLeftRightMatch(left, right, Double.class)) return (Double) left / (Double) right;
-        break;
-      case EQUAL_EQUAL:
-        if (isLeftRightMatch(left, right, String.class))
-          return ((String) left).equals((String) right);
-        if (isLeftRightMatch(left, right, Double.class))
-          return ((Double) left).equals((Double) right);
-        if (left == null && right != null) return false;
-        return left == right;
-      case BANG_EQUAL:
-        if (isLeftRightMatch(left, right, String.class))
-          return !((String) left).equals((String) right);
-        if (isLeftRightMatch(left, right, Double.class))
-          return !((Double) left).equals((Double) right);
-        if (left == null && right != null) return true;
-        return left != right;
+        checkNumberOperands(expr.operator, left, right);
+        return (double) left / (double) right;
+      case STAR:
+        checkNumberOperands(expr.operator, left, right);
+        return (double) left * (double) right;
       case GREATER:
-        if (isLeftRightMatch(left, right, Double.class)) return (Double) left > (Double) right;
-        break;
+        checkNumberOperands(expr.operator, left, right);
+        return (double) left > (double) right;
       case GREATER_EQUAL:
-        if (isLeftRightMatch(left, right, Double.class)) return (Double) left >= (Double) right;
-        break;
+        checkNumberOperands(expr.operator, left, right);
+        return (double) left >= (double) right;
       case LESS:
-        if (isLeftRightMatch(left, right, Double.class)) return (Double) left < (Double) right;
-        break;
+        checkNumberOperands(expr.operator, left, right);
+        return (double) left < (double) right;
       case LESS_EQUAL:
-        if (isLeftRightMatch(left, right, Double.class)) return (Double) left <= (Double) right;
-        break;
+        checkNumberOperands(expr.operator, left, right);
+        return (double) left <= (double) right;
+      case BANG_EQUAL:
+        return !isEqual(left, right);
+      case EQUAL_EQUAL:
+        return isEqual(left, right);
       default:
-        // Cannot be reached because the parser would not generate
-        // a binary expr with any other token type. But java forces
-        // us to handle the cases of all the token types.
-        return null;
+        break;
     }
 
-    throw new InterpreterError(
-        "Trying to perform an impossible operation: "
-            + expr.left.toString()
-            + " and "
-            + expr.right.toString()
-            + " can't be performed. ",
-        expr.operator);
+    return null;
   }
 
-  @Override
-  public Object visitGroupingExpr(Grouping expr) {
-    Object value = expr.expression.accept(this);
-    return value;
+  private boolean isEqual(Object a, Object b) {
+    if (a == null && b == null) return true;
+    if (a == null) return false;
+
+    return a.equals(b);
   }
 
-  @Override
-  public Object visitLiteralExpr(Literal expr) {
-    // false, true, nil
-    // number, string
-    Object value = expr.value;
-
-    if (value == null) return null;
-    if (isInstanceOf(value, Double.class)) return (Double) value;
-    if (isInstanceOf(value, String.class)) return (String) value;
-    if (isInstanceOf(value, Boolean.class)) return (Boolean) value;
-
-    throw new InterpreterError(
-        "This token is none of the accepted types: Boolean, String, Decimal", null);
+  private boolean isTruthy(Object object) {
+    if (object == null) return false;
+    if (object instanceof Boolean) return (boolean) object;
+    return true;
   }
 
-  @Override
-  public Object visitUnaryExpr(Unary expr) {
-    // BANG, MINUS
-    // expr.accept(Visitor<R> visitor)
-    Object value = expr.right.accept(this);
-
-    if (expr.operator.type == BANG) {
-      if (isInstanceOf(value, Boolean.class)) {
-        return !(Boolean) value;
-      } else if (value == null) return true;
-      else return false;
-    } else if (expr.operator.type == MINUS) {
-      if (isInstanceOf(value, Double.class)) {
-        return -(Double) value;
-      }
-    }
-
-    throw new InterpreterError(
-        "Trying to perform an impossible operation: " + expr.operator + " on " + value.getClass(),
-        expr.operator);
+  private void checkNumberOperand(Token operator, Object operand) {
+    if (operand instanceof Double) return;
+    throw new RuntimeError(operator, "Operand must be a number");
   }
 
-  boolean isInstanceOf(Object obj, Class<?>... classes) {
-    for (Class<?> clazz : classes) {
-      if (clazz.isInstance(obj)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  boolean isLeftRightMatch(Object left, Object right, Class<?> clazz) {
-    if (clazz.isInstance(left) && clazz.isInstance(right)) return true;
-    return false;
+  private void checkNumberOperands(Token operator, Object left, Object right) {
+    if (left instanceof Double && right instanceof Double) return;
+    throw new RuntimeError(operator, "Operands must be a number");
   }
 }

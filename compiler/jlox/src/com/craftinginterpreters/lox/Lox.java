@@ -1,6 +1,5 @@
 package com.craftinginterpreters.lox;
 
-import com.craftinginterpreters.lox.Interpreter.InterpreterError;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -15,6 +14,9 @@ import java.util.List;
 // this file (same package) and tokenize `source` here.
 public class Lox {
   static boolean hadError = false;
+  static boolean hadRuntimeError = false;
+
+  private static final Interpreter interpreter = new Interpreter();
 
   public static void main(String[] args) throws IOException {
     if (args.length > 1) {
@@ -31,6 +33,7 @@ public class Lox {
     byte[] bytes = Files.readAllBytes(Paths.get(path));
     run(new String(bytes, Charset.defaultCharset()));
     if (hadError) System.exit(65);
+    if (hadRuntimeError) System.exit(70);
   }
 
   private static void runPrompt() throws IOException {
@@ -43,6 +46,7 @@ public class Lox {
       if (line == null) break; // Ctrl-D to exit
       run(line);
       hadError = false;
+      hadRuntimeError = false;
     }
   }
 
@@ -55,14 +59,12 @@ public class Lox {
     // Stop if there was a syntax error.
     if (hadError) return;
 
-    new AstPrinter().print(expr);
+    interpreter.interpret(expr);
+  }
 
-    try {
-      Object obj = expr.accept(new Interpreter());
-      System.out.println("Result: " + obj);
-    } catch (InterpreterError e) {
-      error(e.token, e.getMessage());
-    }
+  static void runtimeError(RuntimeError error) {
+    System.err.println(error.getMessage() + "\n[line " + error.token.line + "]");
+    hadRuntimeError = true;
   }
 
   static void error(int line, String message) {
